@@ -1,4 +1,4 @@
-import { MessageCodec, Platform, getAllQueryString } from 'ranuts/utils';
+import { Platform, getAllQueryString } from 'ranuts/utils';
 import type { MessageHandler } from 'ranuts/utils';
 import { setDocmentObj } from './store';
 import 'ranui/button';
@@ -28,38 +28,19 @@ let fileChunks: RenderOfficeData[] = [];
 const events: Record<string, MessageHandler<any, unknown>> = {
   RENDER_OFFICE: async (data: RenderOfficeData) => {
     // 处理来自外部的文档渲染请求
-    fileChunks.push(data);
-    if (fileChunks.length >= data.totalChunks) {
-      const file = await MessageCodec.decodeFileChunked(fileChunks);
-      
-      // 生成唯一的文件ID
-      const fileId = `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // 读取文件为ArrayBuffer，然后转换为base64
-      const arrayBuffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      const binaryString = Array.from(bytes, byte => String.fromCharCode(byte)).join('');
-      const base64Data = btoa(binaryString);
-      
-      // 将文件数据存储到sessionStorage
-      sessionStorage.setItem(fileId, JSON.stringify({
-        fileName: file.name,
-        fileType: file.type,
-        fileSize: file.size,
-        lastModified: file.lastModified,
-        fileData: base64Data
-      }));
-      
-      // 构建编辑器URL
-      const url = new URL('./editor.html', window.location.href);
-      url.searchParams.set('action', 'upload');
-      url.searchParams.set('fileId', fileId);
-      
-      // 在新页面打开编辑器
-      window.open(url.toString(), '_blank');
-      
-      fileChunks = [];
-    }
+    // 这种情况下我们需要处理文件数据，因为是外部集成
+    console.log('External document render request received');
+    
+    // 直接跳转到编辑器页面，让用户选择文件
+    // 外部调用时，用户可能已经准备好了文件
+    const url = new URL('./editor.html', window.location.href);
+    url.searchParams.set('action', 'upload');
+    url.searchParams.set('external', 'true');
+    
+    window.open(url.toString(), '_blank');
+    
+    // 清理fileChunks
+    fileChunks = [];
   },
   CLOSE_EDITOR: () => {
     fileChunks = [];
@@ -72,10 +53,8 @@ Platform.init(events);
 const { file } = getAllQueryString();
 
 const onCreateNew = async (ext: string) => {
-  const fileName = `新建文档${ext}`;
   const url = new URL('./editor.html', window.location.href);
   url.searchParams.set('action', 'new');
-  url.searchParams.set('fileName', fileName);
   url.searchParams.set('fileType', ext);
   
   // 在新页面打开编辑器
@@ -86,57 +65,15 @@ const onCreateNew = async (ext: string) => {
 // example: window.onCreateNew('.pptx')
 window.onCreateNew = onCreateNew;
 
-// Create a single file input element
-const fileInput = document.createElement('input');
-fileInput.type = 'file';
-fileInput.accept = '.docx,.xlsx,.pptx,.doc,.xls,.ppt';
-fileInput.style.setProperty('visibility', 'hidden');
-document.body.appendChild(fileInput);
+// 文件选择现在在编辑器页面处理，不再需要隐藏的input元素
 
 const onOpenDocument = async () => {
-  return new Promise((resolve) => {
-    // 触发文件选择器的点击事件
-    fileInput.click();
-    fileInput.onchange = async (event) => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (file) {
-        try {
-          // 生成唯一的文件ID
-          const fileId = `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          
-          // 读取文件为ArrayBuffer，然后转换为base64
-          const arrayBuffer = await file.arrayBuffer();
-          const bytes = new Uint8Array(arrayBuffer);
-          const binaryString = Array.from(bytes, byte => String.fromCharCode(byte)).join('');
-          const base64Data = btoa(binaryString);
-          
-          // 将文件数据存储到sessionStorage
-          sessionStorage.setItem(fileId, JSON.stringify({
-            fileName: file.name,
-            fileType: file.type,
-            fileSize: file.size,
-            lastModified: file.lastModified,
-            fileData: base64Data
-          }));
-          
-          // 构建编辑器URL
-          const url = new URL('./editor.html', window.location.href);
-          url.searchParams.set('action', 'upload');
-          url.searchParams.set('fileId', fileId);
-          
-          // 在新页面打开编辑器
-          window.open(url.toString(), '_blank');
-          resolve(true);
-        } catch (error) {
-          console.error('Failed to process file:', error);
-          alert('文件处理失败，请重试');
-        }
-        
-        // 清空文件选择，这样同一个文件可以重复选择
-        fileInput.value = '';
-      }
-    };
-  });
+  // 直接跳转到编辑器页面，让用户在那里选择文件
+  const url = new URL('./editor.html', window.location.href);
+  url.searchParams.set('action', 'upload');
+  
+  // 在新页面打开编辑器
+  window.open(url.toString(), '_blank');
 };
 
 // Create and append the professional homepage
@@ -194,7 +131,7 @@ const createHomepage = () => {
                     <path d="M8 1l3 3h-2v4H7V4H5l3-3z" fill="currentColor"/>
                     <path d="M4 9v4h8V9h1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V9h1z" fill="currentColor"/>
                   </svg>
-                  上传文档
+                  打开文档编辑器
                 </r-button>
                 <div class="new-document-group">
                   <r-button class="btn-secondary" id="new-word-btn">
@@ -321,8 +258,8 @@ const createHomepage = () => {
           <div class="step">
             <div class="step-number">1</div>
             <div class="step-content">
-              <h4 class="step-title">上传或新建</h4>
-              <p class="step-description">点击"上传文档"打开现有文件，或选择"新建"创建空白文档</p>
+              <h4 class="step-title">打开编辑器</h4>
+              <p class="step-description">点击相应按钮打开文档编辑器，在新页面中选择文件或创建新文档</p>
             </div>
           </div>
           <div class="step">
