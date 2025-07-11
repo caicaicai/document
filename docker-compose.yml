@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  onlyoffice-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: onlyoffice-web
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.onlyoffice-web.rule=Host(`your-domain.com`)"
+      - "traefik.http.routers.onlyoffice-web.tls=true"
+      - "traefik.http.routers.onlyoffice-web.tls.certresolver=letsencrypt"
+    networks:
+      - onlyoffice-network
+
+networks:
+  onlyoffice-network:
+    driver: bridge 

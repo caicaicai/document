@@ -7,8 +7,29 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  base: '/document',
+  base: process.env.VITE_BASE_PATH || '/',
   publicDir: 'public',
+  server: {
+    host: process.env.VITE_HOST || '0.0.0.0',
+    port: parseInt(process.env.VITE_PORT || '5173'),
+    strictPort: true,
+    watch: {
+      usePolling: true,
+    },
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 4173,
+    strictPort: true,
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        editor: resolve(__dirname, 'editor.html'),
+      },
+    },
+  },
   resolve: {
     alias: {
       '@/lib': resolve(__dirname, '/lib'),

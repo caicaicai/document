@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link href="./img/64.png" rel="shortcut icon" />
+    <title>OnlyOffice Web - 文档编辑器</title>
+    <script src="./web-apps/apps/api/documents/api.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      html, body {
+        height: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        overflow: hidden;
+      }
+      
+      #app {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      
+      #iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(2px);
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f0f0f0;
+        border-top: 4px solid #1890ff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        color: #666;
+        font-size: 14px;
+      }
+      
+      .error-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 32px;
+        border-radius: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px;
+        z-index: 1001;
+      }
+      
+      .error-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      
+      .error-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+      }
+      
+      .error-description {
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 24px;
+      }
+      
+      .back-button {
+        background: #1890ff;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      
+      .back-button:hover {
+        background: #40a9ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载文档编辑器...</div>
+      </div>
+      <div id="iframe"></div>
+      <div id="error-message" class="error-message" style="display: none;">
+        <div class="error-icon">❌</div>
+        <div class="error-title">加载失败</div>
+        <div class="error-description">无法加载文档编辑器，请检查文件格式或网络连接。</div>
+        <button class="back-button" onclick="window.history.back()">返回首页</button>
+      </div>
+    </div>
+  </body>
+  <script type="module" src="./editor.ts"></script>
+</html> 

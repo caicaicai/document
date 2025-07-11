@@ -81,8 +81,16 @@ class X2TConverter {
   };
 
   private readonly WORKING_DIRS = ['/working', '/working/media', '/working/fonts', '/working/themes'];
-  private readonly SCRIPT_PATH = '/document/wasm/x2t/x2t.js';
   private readonly INIT_TIMEOUT = 300000;
+
+  /**
+   * 获取X2T脚本路径
+   */
+  private getScriptPath(): string {
+    // 使用相对路径，因为index.html和editor.html都在同一目录下
+    // 这样可以确保在两个页面中都能正确访问wasm文件
+    return './wasm/x2t/x2t.js';
+  }
 
   /**
    * 加载 X2T 脚本文件
@@ -92,7 +100,7 @@ class X2TConverter {
 
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = this.SCRIPT_PATH;
+      script.src = this.getScriptPath();
       script.onload = () => {
         this.hasScriptLoaded = true;
         console.log('X2T WASM script loaded successfully');
