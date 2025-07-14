@@ -293,6 +293,7 @@ const createHomepage = () => {
           </div>
         </div>
       </div>
+      <script defer src="https://umami.xiaocaicai.com/script.js" data-website-id="97fff122-f705-4924-8630-ded8d28130e9"></script>
     </footer>
   `;
 
